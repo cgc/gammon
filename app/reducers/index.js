@@ -103,6 +103,10 @@ function occupiedPointIndices(currentPlayer, points) {
   }, []);
 }
 
+export function hasPlayerWon(currentPlayer, points) {
+  return !occupiedPointIndices(currentPlayer, points).length;
+}
+
 function isPlayerBearingOff(currentPlayer, points) {
   const bearingOff = currentPlayer === WHITE ?
     WHITE_BEARING_OFF_INDICES : BLACK_BEARING_OFF_INDICES;
@@ -247,6 +251,11 @@ const reducer = handleActions({
     rolls: [],
     currentPlayer: otherPlayer(state.currentPlayer),
     turnPhase: 'ROLL_DICE',
+  }),
+
+  END_GAME: (state, action) => ({
+    ...state,
+    turnPhase: action.payload === WHITE ? 'WHITE_WIN' : 'BLACK_WIN',
   }),
 
   SELECT_POINT: (state, action) => ({

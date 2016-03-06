@@ -19,7 +19,9 @@ export const Board = React.createClass({
     home: PropTypes.arrayOf(pointType.isRequired),
     rolls: PropTypes.arrayOf(PropTypes.number).isRequired,
     currentPlayer: PropTypes.oneOf([WHITE, BLACK]).isRequired,
-    turnPhase: PropTypes.oneOf(['NEW', 'ROLL_DICE', 'MOVE_PIECES']).isRequired,
+    turnPhase: PropTypes.oneOf([
+      'NEW', 'ROLL_DICE', 'MOVE_PIECES', 'WHITE_WIN', 'BLACK_WIN',
+    ]).isRequired,
     selectedPointIndex: PropTypes.number.isRequired,
 
     // bound actions
@@ -95,21 +97,31 @@ export const Board = React.createClass({
       </div>
     </div>);
 
+    const endGamePhases = ['WHITE_WIN', 'BLACK_WIN'];
+
     let action;
     if (this.props.turnPhase === 'ROLL_DICE') {
       action = <button onClick={ this.props.rollDice }>Roll dice</button>;
     } else if (this.props.turnPhase === 'MOVE_PIECES') {
       action = <div>Rolls: { this.props.rolls.join(' ') }</div>;
-    } else if (this.props.turnPhase === 'NEW') {
+    } else if (['NEW'].concat(endGamePhases).includes(this.props.turnPhase)) {
       action = <button onClick={ this.props.startGame }>Start game</button>;
     }
 
-    const currentPlayerClassname = classnames('Board-currentPlayer', {
-      'Board-currentPlayerWhite': this.props.currentPlayer === WHITE,
-      'Board-currentPlayerBlack': this.props.currentPlayer === BLACK,
+    let statusColor = this.props.currentPlayer;
+    let message = 'Current';
+    if (endGamePhases.includes(this.props.turnPhase)) {
+      statusColor = this.props.turnPhase === 'WHITE_WIN' ? WHITE : BLACK;
+      message = 'WINNER';
+    }
+
+    const statusClassname = classnames('Board-playerStatus', {
+      'Board-playerStatusWhite': statusColor === WHITE,
+      'Board-playerStatusBlack': statusColor === BLACK,
     });
-    const current = (<div className={ currentPlayerClassname }>
-      Current: { this.props.currentPlayer }</div>);
+    const status = (<div className={ statusClassname }>
+      { message }: { statusColor }
+    </div>);
 
     const whiteHome = this.props.home.find(point => point.color === WHITE);
     const blackHome = this.props.home.find(point => point.color === BLACK);
@@ -118,7 +130,7 @@ export const Board = React.createClass({
       { renderedPoints }
       <div className="Board-homes">
         { this._renderHome(whiteHome) }
-        { current }
+        { status }
         { action }
         { this._renderHome(blackHome) }
       </div>

@@ -1,5 +1,10 @@
 import { createAction } from 'redux-actions';
-import { WHITE, WHITE_ON_BAR_INDEX, BLACK_ON_BAR_INDEX } from '../reducers/index';
+import {
+  WHITE,
+  WHITE_ON_BAR_INDEX,
+  BLACK_ON_BAR_INDEX,
+  hasPlayerWon,
+} from '../reducers/index';
 
 export const startGame = createAction('START_GAME');
 export const movePiece = createAction('MOVE_PIECE');
@@ -9,6 +14,7 @@ export const rollDice = createAction('ROLL_DICE');
 export const endTurn = createAction('END_TURN');
 export const movePieceHome = createAction('MOVE_PIECE_HOME');
 export const newError = createAction('NEW_ERROR');
+export const endGame = createAction('END_GAME');
 
 export function doMovePiece(currentIndex, nextIndex) {
   return (dispatch, getState) => {
@@ -43,9 +49,11 @@ export function clickOnPoint(index) {
 }
 
 export function doMovePieceHome(homeColor) {
-  return (dispatch) => {
+  return (dispatch, getState) => {
     dispatch(movePieceHome(homeColor));
     dispatch(deselectPoint());
-    // XXX could have won?
+    if (hasPlayerWon(getState().currentPlayer, getState().points)) {
+      dispatch(endGame(getState().currentPlayer));
+    }
   };
 }
