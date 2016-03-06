@@ -1,0 +1,22 @@
+@import './variables';
+
+.Checker {
+  width: var(--checkerWidth);
+  height: var(--checkerWidth);
+  /* centers text vertically */
+  line-height: calc(var(--checkerWidth) - 0.1rem);
+  text-align: center;
+  border-radius: 100%;
+  border: 0.1rem solid;
+  box-sizing: border-box;
+}
+
+.Checker--white {
+  background-color: var(--white);
+  border-color: var(--black);
+}
+
+.Checker--black {
+  background-color: var(--black);
+  border-color: var(--white);
+}

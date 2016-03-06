@@ -1,0 +1,8 @@
+:root {
+  /* from https://milligram.github.io/ */
+  --black: #606c76;
+  --white: white;
+  /* from wikipedia's table at the bottom of articles */
+  --yellow: #ffebc3;
+  --checkerWidth: 2rem;
+}
