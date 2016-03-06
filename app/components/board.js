@@ -2,8 +2,12 @@ import React from 'react';
 const PropTypes = React.PropTypes;
 import classnames from 'classnames';
 import { connect } from 'react-redux';
-import { clickOnPoint, rollDice, startGame, doMovePieceHome } from '../actions';
-import { WHITE, BLACK, WHITE_ON_BAR_INDEX, BLACK_ON_BAR_INDEX } from '../reducers';
+import {
+  clickOnPoint, rollDice, startGame, doMovePieceHome, forfeitRolls,
+} from '../actions';
+import {
+  WHITE, BLACK, WHITE_ON_BAR_INDEX, BLACK_ON_BAR_INDEX,
+} from '../reducers';
 
 require('../styles/Board.css');
 require('../styles/Checker.css');
@@ -29,6 +33,7 @@ export const Board = React.createClass({
     rollDice: PropTypes.func.isRequired,
     startGame: PropTypes.func.isRequired,
     movePieceHome: PropTypes.func.isRequired,
+    forfeitRolls: PropTypes.func.isRequired,
   },
 
   _renderChecker(point, options = { canBeDisabled: true }) {
@@ -103,7 +108,10 @@ export const Board = React.createClass({
     if (this.props.turnPhase === 'ROLL_DICE') {
       action = <button onClick={ this.props.rollDice }>Roll dice</button>;
     } else if (this.props.turnPhase === 'MOVE_PIECES') {
-      action = <div>Rolls: { this.props.rolls.join(' ') }</div>;
+      action = (<div>
+        <div>Rolls: { this.props.rolls.join(' ') }</div>
+        <button onClick={ this.props.forfeitRolls }>Give up</button>
+      </div>);
     } else if (['NEW'].concat(endGamePhases).includes(this.props.turnPhase)) {
       action = <button onClick={ this.props.startGame }>Start game</button>;
     }
@@ -150,4 +158,5 @@ export default connect((state) => ({
   movePieceHome: payload => dispatch(doMovePieceHome(payload)),
   rollDice: () => dispatch(rollDice()),
   startGame: () => dispatch(startGame()),
+  forfeitRolls: () => dispatch(forfeitRolls()),
 }))(Board);

@@ -18,9 +18,8 @@ export const endGame = createAction('END_GAME');
 
 export function doMovePiece(currentIndex, nextIndex) {
   return (dispatch, getState) => {
-    // forfeit rolls if not possible
     dispatch(movePiece({ currentIndex, nextIndex }));
-    if (!getState().rolls.length) { // XXX detect forefeited rolls
+    if (!getState().rolls.length) {
       dispatch(endTurn());
     }
   };
@@ -55,5 +54,12 @@ export function doMovePieceHome(homeColor) {
     if (hasPlayerWon(getState().currentPlayer, getState().points)) {
       dispatch(endGame(getState().currentPlayer));
     }
+  };
+}
+
+export function forfeitRolls() {
+  return (dispatch) => {
+    // TODO make sure the forfeit is valid
+    dispatch(endTurn());
   };
 }
