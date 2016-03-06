@@ -7,11 +7,10 @@ export const selectPoint = createAction('SELECT_POINT');
 export const deselectPoint = createAction('DESELECT_POINT');
 export const rollDice = createAction('ROLL_DICE');
 export const endTurn = createAction('END_TURN');
+export const movePieceHome = createAction('MOVE_PIECE_HOME');
 
 export function doMovePiece(currentIndex, nextIndex) {
   return (dispatch, getState) => {
-    // end game?
-    // move to home row
     // forfeit rolls if not possible
     dispatch(movePiece({ currentIndex, nextIndex }));
     if (!getState().rolls.length) { // XXX detect forefeited rolls
@@ -39,5 +38,13 @@ export function clickOnPoint(index) {
         dispatch(deselectPoint());
       }
     }
+  };
+}
+
+export function doMovePieceHome(homeColor) {
+  return (dispatch) => {
+    dispatch(movePieceHome(homeColor));
+    dispatch(deselectPoint());
+    // XXX could have won?
   };
 }

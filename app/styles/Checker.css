@@ -9,6 +9,7 @@
   border-radius: 100%;
   border: 0.1rem solid;
   box-sizing: border-box;
+  cursor: pointer;
 }
 
 .Checker--white {
@@ -19,4 +20,9 @@
 .Checker--black {
   background-color: var(--black);
   border-color: var(--white);
+}
+
+.Checker.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

@@ -2,18 +2,21 @@ import React from 'react';
 const PropTypes = React.PropTypes;
 import classnames from 'classnames';
 import { connect } from 'react-redux';
-import { clickOnPoint, rollDice, startGame } from '../actions';
+import { clickOnPoint, rollDice, startGame, doMovePieceHome } from '../actions';
 import { WHITE, BLACK, WHITE_ON_BAR_INDEX, BLACK_ON_BAR_INDEX } from '../reducers';
 
 require('../styles/Board.css');
 require('../styles/Checker.css');
 
+const pointType = PropTypes.shape({
+  color: PropTypes.oneOf([WHITE, BLACK]).isRequired,
+  count: PropTypes.number.isRequired,
+});
+
 export const Board = React.createClass({
   propTypes: {
-    points: PropTypes.arrayOf(PropTypes.shape({
-      color: PropTypes.oneOf([WHITE, BLACK]).isRequired,
-      count: PropTypes.number.isRequired,
-    }).isRequired),
+    points: PropTypes.arrayOf(pointType.isRequired),
+    home: PropTypes.arrayOf(pointType.isRequired),
     rolls: PropTypes.arrayOf(PropTypes.number).isRequired,
     currentPlayer: PropTypes.oneOf([WHITE, BLACK]).isRequired,
     turnPhase: PropTypes.oneOf(['NEW', 'ROLL_DICE', 'MOVE_PIECES']).isRequired,
@@ -23,15 +26,31 @@ export const Board = React.createClass({
     clickOnPoint: PropTypes.func.isRequired,
     rollDice: PropTypes.func.isRequired,
     startGame: PropTypes.func.isRequired,
+    movePieceHome: PropTypes.func.isRequired,
   },
 
-  _renderChecker(point) {
+  _renderChecker(point, options = { canBeDisabled: true }) {
     const checkerClassame = classnames('Checker', {
       'Checker--white': point.color === WHITE,
       'Checker--black': point.color === BLACK,
+      'is-disabled': point.count === 0 && options.canBeDisabled,
     });
     return (<div className={ checkerClassame }>
       { point.count }
+    </div>);
+  },
+
+  _renderHome(point) {
+    let onClick;
+    if (point.color === this.props.currentPlayer) {
+      onClick = this.props.movePieceHome.bind(null, point.color);
+    }
+    const classname = classnames({
+      'Board-whiteHome': point.color === WHITE,
+      'Board-blackHome': point.color === BLACK,
+    });
+    return (<div className={ classname } onClick={ onClick }>
+      { this._renderChecker(point, { canBeDisabled: false }) }
     </div>);
   },
 
@@ -92,13 +111,16 @@ export const Board = React.createClass({
     const current = (<div className={ currentPlayerClassname }>
       Current: { this.props.currentPlayer }</div>);
 
+    const whiteHome = this.props.home.find(point => point.color === WHITE);
+    const blackHome = this.props.home.find(point => point.color === BLACK);
+
     return (<div className="Board">
       { renderedPoints }
       <div className="Board-homes">
-        <div className="Board-whiteHome"></div>
+        { this._renderHome(whiteHome) }
         { current }
         { action }
-        <div className="Board-blackHome"></div>
+        { this._renderHome(blackHome) }
       </div>
     </div>);
   },
@@ -106,12 +128,14 @@ export const Board = React.createClass({
 
 export default connect((state) => ({
   points: state.points,
+  home: state.home,
   currentPlayer: state.currentPlayer,
   turnPhase: state.turnPhase,
   rolls: state.rolls,
   selectedPointIndex: state.selectedPointIndex,
 }), (dispatch) => ({
   clickOnPoint: payload => dispatch(clickOnPoint(payload)),
+  movePieceHome: payload => dispatch(doMovePieceHome(payload)),
   rollDice: () => dispatch(rollDice()),
   startGame: () => dispatch(startGame()),
 }))(Board);

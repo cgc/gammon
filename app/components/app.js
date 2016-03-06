@@ -3,7 +3,12 @@ import Board from './board';
 
 const App = React.createClass({
   render() {
-    return <Board />;
+    // XXX
+    const error = null;
+    return (<div>
+      <Board />
+      { error }
+    </div>);
   },
 });
 

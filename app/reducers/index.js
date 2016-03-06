@@ -8,6 +8,8 @@ export const BLACK = 'BLACK';
 
 export const WHITE_ON_BAR_INDEX = 0;
 export const BLACK_ON_BAR_INDEX = 25;
+export const WHITE_BEARING_OFF_INDICES = new Set([19, 20, 21, 22, 23, 24]);
+export const BLACK_BEARING_OFF_INDICES = new Set([1, 2, 3, 4, 5, 6]);
 
 const parsedQuery = querystring.parse(window.location.search.slice(1));
 
@@ -86,6 +88,34 @@ function otherPlayer(currentPlayer) {
   return currentPlayer === WHITE ? BLACK : WHITE;
 }
 
+function assertCanMoveFrom(currentPlayer, currentPoint) {
+  invariant(currentPoint.count !== 0, 'can only move from points that have checkers');
+  invariant(currentPoint.color === currentPlayer, 'can only move pieces of the current player');
+}
+
+function occupiedPointIndices(currentPlayer, points) {
+  return points.reduce((acc, point, index) => {
+    if (point.color === currentPlayer && point.count) {
+      acc.push(index);
+    }
+    return acc;
+  }, []);
+}
+
+function isPlayerBearingOff(currentPlayer, points) {
+  const bearingOff = currentPlayer === WHITE ?
+    WHITE_BEARING_OFF_INDICES : BLACK_BEARING_OFF_INDICES;
+  return occupiedPointIndices(currentPlayer, points)
+    .every(index => bearingOff.has(index));
+}
+
+function withoutRoll(rolls, currentRoll) {
+  const rollIndex = rolls.findIndex(roll => roll === currentRoll);
+  invariant(rollIndex !== -1,
+    `you can only move a piece as far as one of your rolls: ${rolls.join(', ')}`);
+  return rolls.filter((roll, index) => index !== rollIndex);
+}
+
 const reducer = handleActions({
   START_GAME: () => ({
     ...emptyState(),
@@ -118,19 +148,14 @@ const reducer = handleActions({
     invariant(state.turnPhase === 'MOVE_PIECES', 'must be in move pieces phase to move pieces.');
     const currentPoint = state.points[currentIndex];
     const nextPoint = state.points[nextIndex];
-    invariant(currentPoint.count !== 0, 'can only move from points that have checkers');
-    invariant(currentPoint.color === state.currentPlayer,
-      'can only move pieces of the current player');
+    assertCanMoveFrom(state.currentPlayer, currentPoint);
     invariant(
       state.currentPlayer === WHITE ? currentIndex < nextIndex : nextIndex < currentIndex,
       'can only move to your home row');
     const diff = Math.abs(currentIndex - nextIndex);
 
     invariant(diff, 'cannot move a piece to the same spot.'); // handled by action dispatcher
-    const rollIndex = state.rolls.findIndex(roll => roll === diff);
-    invariant(rollIndex !== -1,
-      `you can only move a piece as far as one of your rolls: ${state.rolls.join(', ')}`);
-    const nextRolls = state.rolls.filter((roll, index) => index !== rollIndex);
+    const nextRolls = withoutRoll(state.rolls, diff);
 
     const newCurrentPoint = {
       ...currentPoint,
@@ -163,6 +188,54 @@ const reducer = handleActions({
           [currentIndex, 1, newCurrentPoint],
           [nextIndex, 1, newNextPoint],
           [onBarPointIndex, 1, newOnBarPoint],
+        ],
+      }),
+    };
+  },
+
+  MOVE_PIECE_HOME: (state, action) => {
+    const homeColor = action.payload;
+    if (state.selectedPointIndex === -1) {
+      return state;
+    }
+    if (homeColor !== state.currentPlayer) {
+      return state;
+    }
+    if (!isPlayerBearingOff(state.currentPlayer, state.points)) {
+      return state;
+    }
+    invariant(state.turnPhase === 'MOVE_PIECES', 'must be in move pieces phase to move pieces.');
+    const currentPoint = state.points[state.selectedPointIndex];
+    assertCanMoveFrom(state.currentPlayer, currentPoint);
+
+    const newCurrentPoint = {
+      ...currentPoint,
+      count: currentPoint.count - 1,
+    };
+
+    const currentHomeIndex = state.home
+      .findIndex(point => point.color === state.currentPlayer);
+    const newHome = {
+      ...state.home[currentHomeIndex],
+      count: state.home[currentHomeIndex].count + 1,
+    };
+
+    const diff = Math.abs(state.selectedPointIndex - (state.currentPlayer === WHITE ?
+      BLACK_ON_BAR_INDEX : WHITE_ON_BAR_INDEX));
+    const minRoll = Math.min(...state.rolls.filter(roll => diff <= roll));
+    const nextRolls = withoutRoll(state.rolls, minRoll);
+
+    return {
+      ...state,
+      rolls: nextRolls,
+      home: update(state.home, {
+        $splice: [
+          [currentHomeIndex, 1, newHome],
+        ],
+      }),
+      points: update(state.points, {
+        $splice: [
+          [state.selectedPointIndex, 1, newCurrentPoint],
         ],
       }),
     };

@@ -1,6 +1,7 @@
 @import './variables';
 
 .Board {
+  display: flex;
 }
 
 .Board-points {
@@ -8,8 +9,8 @@
 }
 
 .Board-bar {
-  padding: 1rem;
-  margin: 0 1rem;
+  padding: 0.5rem;
+  margin: 0 0.5rem;
   box-shadow: inset 0 0 0.1rem color(var(--black) alpha(0.5));
 }
 
@@ -51,4 +52,9 @@
 .Board-checker {
   position: absolute;
   bottom: 0;
+}
+
+.Board-whiteHome,
+.Board-blackHome {
+  padding: 3rem 0;
 }
