@@ -32,7 +32,7 @@ function emptyState() {
   };
 }
 
-function endGameState() {
+function endGameTestState() {
   const points = new Array(26).fill(newPoint());
   points[WHITE_ON_BAR_INDEX] = newPoint(WHITE);
   points[BLACK_ON_BAR_INDEX] = newPoint(BLACK);
@@ -127,7 +127,7 @@ const reducer = handleActions({
     currentPlayer: WHITE,
     turnPhase: 'ROLL_DICE',
     points: newGamePoints(),
-    ...(parsedQuery.end ? endGameState() : {}),
+    ...(parsedQuery.end ? endGameTestState() : {}),
   }),
 
   ROLL_DICE: (state) => {
