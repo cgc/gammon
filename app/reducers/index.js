@@ -28,6 +28,7 @@ function emptyState() {
       newPoint(WHITE),
       newPoint(BLACK),
     ],
+    mostRecentError: null,
   };
 }
 
@@ -151,7 +152,7 @@ const reducer = handleActions({
     assertCanMoveFrom(state.currentPlayer, currentPoint);
     invariant(
       state.currentPlayer === WHITE ? currentIndex < nextIndex : nextIndex < currentIndex,
-      'can only move to your home row');
+      'can only move towards your home row');
     const diff = Math.abs(currentIndex - nextIndex);
 
     invariant(diff, 'cannot move a piece to the same spot.'); // handled by action dispatcher
@@ -256,6 +257,12 @@ const reducer = handleActions({
   DESELECT_POINT: (state) => ({
     ...state,
     selectedPointIndex: -1,
+    mostRecentError: null,
+  }),
+
+  NEW_ERROR: (state, action) => ({
+    ...state,
+    mostRecentError: action.payload,
   }),
 }, emptyState());
 

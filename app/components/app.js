@@ -1,10 +1,18 @@
 import React from 'react';
+const { PropTypes } = React;
 import Board from './board';
+import { connect } from 'react-redux';
 
 const App = React.createClass({
+  propTypes: {
+    mostRecentError: PropTypes.object,
+  },
+
   render() {
-    // XXX
-    const error = null;
+    let error;
+    if (this.props.mostRecentError) {
+      error = this.props.mostRecentError.message;
+    }
     return (<div>
       <Board />
       { error }
@@ -12,4 +20,6 @@ const App = React.createClass({
   },
 });
 
-export default App;
+export default connect((state) => ({
+  mostRecentError: state.mostRecentError,
+}))(App);

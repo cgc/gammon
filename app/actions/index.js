@@ -8,6 +8,7 @@ export const deselectPoint = createAction('DESELECT_POINT');
 export const rollDice = createAction('ROLL_DICE');
 export const endTurn = createAction('END_TURN');
 export const movePieceHome = createAction('MOVE_PIECE_HOME');
+export const newError = createAction('NEW_ERROR');
 
 export function doMovePiece(currentIndex, nextIndex) {
   return (dispatch, getState) => {
