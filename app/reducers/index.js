@@ -37,7 +37,7 @@ function endGameTestState() {
   points[WHITE_ON_BAR_INDEX] = newPoint(WHITE);
   points[BLACK_ON_BAR_INDEX] = newPoint(BLACK);
   points[1] = newPoint(BLACK, 2);
-  points[24] = newPoint(WHITE, 1);
+  points[24] = newPoint(WHITE, 2);
   points[19] = newPoint(WHITE, 1);
   return {
     points,

@@ -16,12 +16,19 @@ export const movePieceHome = createAction('MOVE_PIECE_HOME');
 export const newError = createAction('NEW_ERROR');
 export const endGame = createAction('END_GAME');
 
-export function doMovePiece(currentIndex, nextIndex) {
+export function maybeEndTurn() {
   return (dispatch, getState) => {
-    dispatch(movePiece({ currentIndex, nextIndex }));
     if (!getState().rolls.length) {
       dispatch(endTurn());
     }
+  };
+}
+
+export function doMovePiece(currentIndex, nextIndex) {
+  return (dispatch) => {
+    dispatch(movePiece({ currentIndex, nextIndex }));
+    dispatch(deselectPoint());
+    dispatch(maybeEndTurn());
   };
 }
 
@@ -41,7 +48,6 @@ export function clickOnPoint(index) {
         dispatch(deselectPoint());
       } else {
         dispatch(doMovePiece(selectedPointIndex, index));
-        dispatch(deselectPoint());
       }
     }
   };
@@ -53,6 +59,8 @@ export function doMovePieceHome(homeColor) {
     dispatch(deselectPoint());
     if (hasPlayerWon(getState().currentPlayer, getState().points)) {
       dispatch(endGame(getState().currentPlayer));
+    } else {
+      dispatch(maybeEndTurn());
     }
   };
 }
