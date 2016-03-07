@@ -3,6 +3,7 @@
   --black: #606c76;
   --white: white;
   /* from wikipedia's table at the bottom of articles */
-  --yellow: #ffebc3;
+  --paleYellow: #ffebc3;
+  --brightYellow: #ffd98c;
   --checkerWidth: 2rem;
 }

@@ -63,9 +63,11 @@ export const Board = React.createClass({
 
   _renderPoint(point, index) {
     const classname = classnames('Board-point', {
-      'Board-evenPoint': index % 2 === 0,
-      'Board-oddPoint': index % 2 !== 0,
-      'Board-selectedPoint': this.props.selectedPointIndex === index,
+      'Board--evenPoint': index % 2 === 0,
+      'Board--oddPoint': index % 2 !== 0,
+      'Board--pointsUp': index < 13,
+      'Board--pointsDown': index >= 13,
+      'is-selected': this.props.selectedPointIndex === index,
     });
     const onClick = this.props.clickOnPoint.bind(null, index);
     let checker;
@@ -138,8 +140,10 @@ export const Board = React.createClass({
       { renderedPoints }
       <div className="Board-homes">
         { this._renderHome(whiteHome) }
-        { status }
-        { action }
+        <div>
+          { status }
+          { action }
+        </div>
         { this._renderHome(blackHome) }
       </div>
     </div>);
