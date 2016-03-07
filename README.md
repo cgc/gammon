@@ -5,6 +5,11 @@ run it with
 $ npm run dev
 ```
 
+release it with
+```
+$ npm run release
+```
+
 #### todo
 - enforce forfeit rules
 - ai?
