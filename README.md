@@ -16,3 +16,4 @@ $ npm run release
 - show possible moves on select
 - drag and drop
 - show multiple checkers?
+- undo
