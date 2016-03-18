@@ -42,6 +42,10 @@
   background-color: var(--brightYellow);
 }
 
+.Board-point.is-highlighted {
+  background-color: var(--paleYellow);
+}
+
 .Board-pointArrow {
   position: absolute;
   border-left: 1rem solid transparent;

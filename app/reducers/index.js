@@ -11,6 +11,11 @@ export const BLACK_ON_BAR_INDEX = 25;
 export const WHITE_BEARING_OFF_INDICES = new Set([19, 20, 21, 22, 23, 24]);
 export const BLACK_BEARING_OFF_INDICES = new Set([1, 2, 3, 4, 5, 6]);
 
+const movementDirection = {
+  [WHITE]: 1,
+  [BLACK]: -1,
+};
+
 const parsedQuery = querystring.parse(window.location.search.slice(1));
 
 function newPoint(color = WHITE, count = 0) {
@@ -114,6 +119,14 @@ function isPlayerBearingOff(currentPlayer, points) {
     .every(index => bearingOff.has(index));
 }
 
+export function computePotentialMoves(selectedPointIndex, currentPlayer, rolls) {
+  if (selectedPointIndex === -1) {
+    return [];
+  }
+  const direction = movementDirection[currentPlayer];
+  return rolls.map(roll => direction * roll + selectedPointIndex);
+}
+
 function withoutRoll(rolls, currentRoll) {
   const rollIndex = rolls.findIndex(roll => roll === currentRoll);
   invariant(rollIndex !== -1,
@@ -155,7 +168,7 @@ const reducer = handleActions({
     const nextPoint = state.points[nextIndex];
     assertCanMoveFrom(state.currentPlayer, currentPoint);
     invariant(
-      state.currentPlayer === WHITE ? currentIndex < nextIndex : nextIndex < currentIndex,
+      (nextIndex - currentIndex) * movementDirection[state.currentPlayer] > 0,
       'can only move towards your home row');
     const diff = Math.abs(currentIndex - nextIndex);
 

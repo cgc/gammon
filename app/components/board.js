@@ -6,7 +6,7 @@ import {
   clickOnPoint, rollDice, startGame, doMovePieceHome, forfeitRolls,
 } from '../actions';
 import {
-  WHITE, BLACK, WHITE_ON_BAR_INDEX, BLACK_ON_BAR_INDEX,
+  WHITE, BLACK, WHITE_ON_BAR_INDEX, BLACK_ON_BAR_INDEX, computePotentialMoves,
 } from '../reducers';
 
 require('../styles/Board.css');
@@ -61,13 +61,14 @@ export const Board = React.createClass({
     </div>);
   },
 
-  _renderPoint(point, index) {
+  _renderPoint(point, index, isHighlighted) {
     const classname = classnames('Board-point', {
       'Board--evenPoint': index % 2 === 0,
       'Board--oddPoint': index % 2 !== 0,
       'Board--pointsUp': index < 13,
       'Board--pointsDown': index >= 13,
       'is-selected': this.props.selectedPointIndex === index,
+      'is-highlighted': isHighlighted,
     });
     const onClick = this.props.clickOnPoint.bind(null, index);
     let checker;
@@ -81,8 +82,17 @@ export const Board = React.createClass({
   },
 
   render() {
+    const potentialMoves = computePotentialMoves(this.props.selectedPointIndex,
+      this.props.currentPlayer, this.props.rolls);
+
+    // we slice when rendering here so that we can exclude the bar from rendering
     const points = this.props.points.slice(WHITE_ON_BAR_INDEX + 1, BLACK_ON_BAR_INDEX)
-    .map((point, index) => this._renderPoint(point, index + 1));
+    .map((point, index) => {
+      // We adjust the current index by 1 because we slice when rendering.
+      const actualIndex = index + 1;
+      return this._renderPoint(
+        point, actualIndex, potentialMoves.includes(actualIndex));
+    });
 
     const lowerRightPoints = points.slice(0, 6);
     lowerRightPoints.reverse();

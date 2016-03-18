@@ -17,3 +17,4 @@ $ npm run release
 - drag and drop
 - show multiple checkers?
 - undo
+- render dice
