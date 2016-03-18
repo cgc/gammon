@@ -2,19 +2,62 @@ import React from 'react';
 const PropTypes = React.PropTypes;
 import classnames from 'classnames';
 import { connect } from 'react-redux';
+import { Checker } from './checker';
 import {
   clickOnPoint, rollDice, startGame, doMovePieceHome, forfeitRolls,
 } from '../actions';
 import {
   WHITE, BLACK, WHITE_ON_BAR_INDEX, BLACK_ON_BAR_INDEX, computePotentialMoves,
 } from '../reducers';
+import { pointType } from './types';
 
 require('../styles/Board.css');
 require('../styles/Checker.css');
 
-const pointType = PropTypes.shape({
-  color: PropTypes.oneOf([WHITE, BLACK]).isRequired,
-  count: PropTypes.number.isRequired,
+export const BoardPoint = React.createClass({
+  propTypes: {
+    point: pointType.isRequired,
+    index: PropTypes.number.isRequired,
+    isHighlighted: PropTypes.bool.isRequired,
+    isSelected: PropTypes.bool.isRequired,
+    onClick: PropTypes.func.isRequired,
+  },
+
+  render() {
+    const { point, index } = this.props;
+
+    const pointsUp = index < 13;
+
+    const classname = classnames('Board-point', {
+      'Board--evenPoint': index % 2 === 0,
+      'Board--oddPoint': index % 2 !== 0,
+      'Board--pointsUp': pointsUp,
+      'Board--pointsDown': !pointsUp,
+      'is-selected': this.props.isSelected,
+      'is-highlighted': this.props.isHighlighted,
+    });
+
+    const checkerMargin = 8;
+    const checkers = Array(point.count).fill(null).map((item, checkerIndex) => {
+      const style = {};
+      if (pointsUp) {
+        style.marginBottom = checkerIndex * checkerMargin;
+      } else {
+        style.marginTop = checkerIndex * checkerMargin;
+      }
+      return (
+        <div key={ checkerIndex } className="Board-checker">
+          <Checker point={ point } hideCount style={ style } />
+        </div>
+      );
+    });
+    return (<div className={ classname }
+      onClick={ this.props.onClick }
+    >
+      <div className="Board-pointArrow"></div>
+      { checkers }
+    </div>);
+  },
 });
 
 export const Board = React.createClass({
@@ -36,17 +79,6 @@ export const Board = React.createClass({
     forfeitRolls: PropTypes.func.isRequired,
   },
 
-  _renderChecker(point, options = { canBeDisabled: true }) {
-    const checkerClassame = classnames('Checker', {
-      'Checker--white': point.color === WHITE,
-      'Checker--black': point.color === BLACK,
-      'is-disabled': point.count === 0 && options.canBeDisabled,
-    });
-    return (<div className={ checkerClassame }>
-      { point.count }
-    </div>);
-  },
-
   _renderHome(point) {
     let onClick;
     if (point.color === this.props.currentPlayer) {
@@ -57,27 +89,7 @@ export const Board = React.createClass({
       'Board-blackHome': point.color === BLACK,
     });
     return (<div className={ classname } onClick={ onClick }>
-      { this._renderChecker(point, { canBeDisabled: false }) }
-    </div>);
-  },
-
-  _renderPoint(point, index, isHighlighted) {
-    const classname = classnames('Board-point', {
-      'Board--evenPoint': index % 2 === 0,
-      'Board--oddPoint': index % 2 !== 0,
-      'Board--pointsUp': index < 13,
-      'Board--pointsDown': index >= 13,
-      'is-selected': this.props.selectedPointIndex === index,
-      'is-highlighted': isHighlighted,
-    });
-    const onClick = this.props.clickOnPoint.bind(null, index);
-    let checker;
-    if (point.count) {
-      checker = this._renderChecker(point);
-    }
-    return (<div key={ index } className={ classname } onClick={ onClick }>
-      <div className="Board-pointArrow"></div>
-      <div className="Board-checker">{ checker }</div>
+      <Checker point={ point } canBeDisabled={ false } />
     </div>);
   },
 
@@ -87,11 +99,15 @@ export const Board = React.createClass({
 
     // we slice when rendering here so that we can exclude the bar from rendering
     const points = this.props.points.slice(WHITE_ON_BAR_INDEX + 1, BLACK_ON_BAR_INDEX)
-    .map((point, index) => {
+    .map((point, _index) => {
       // We adjust the current index by 1 because we slice when rendering.
-      const actualIndex = index + 1;
-      return this._renderPoint(
-        point, actualIndex, potentialMoves.includes(actualIndex));
+      const index = _index + 1;
+      const onClick = this.props.clickOnPoint.bind(null, index);
+      return (<BoardPoint key={ index } point={ point } index={ index }
+        isSelected={ this.props.selectedPointIndex === index }
+        isHighlighted={ potentialMoves.includes(index) }
+        onClick={ onClick }
+      />);
     });
 
     const lowerRightPoints = points.slice(0, 6);
@@ -105,8 +121,8 @@ export const Board = React.createClass({
         <div className="Board-quadrant">{ lowerLeftPoints }</div>
       </div>
       <div className="Board-bar">
-        <div>{ this._renderChecker(this.props.points[WHITE_ON_BAR_INDEX]) }</div>
-        <div>{ this._renderChecker(this.props.points[BLACK_ON_BAR_INDEX]) }</div>
+        <div><Checker point={ this.props.points[WHITE_ON_BAR_INDEX] } /></div>
+        <div><Checker point={ this.props.points[BLACK_ON_BAR_INDEX] } /></div>
       </div>
       <div className="Board-half">
         <div className="Board-quadrant">{ points.slice(18, 24) }</div>
