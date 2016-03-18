@@ -1,0 +1,49 @@
+:root {
+  --dotWidth: 6px;
+  --dotMargin: 1px;
+}
+/*
+Die is a 22px square rectangle. 1px margin between two dots or between a dot
+and the border, dots are 6px wide, so that is 1px * 4 + 6px * 3 = 22px
+*/
+
+.Die {
+  display: inline-block;
+  position: relative;
+  width: calc(var(--dotMargin) * 4 + var(--dotWidth) * 3);
+  height: calc(var(--dotMargin) * 4 + var(--dotWidth) * 3);
+  border-radius: 3px;
+  border: var(--dotMargin) solid black;
+}
+
+.DieDot {
+  position: absolute;
+  width: var(--dotWidth);
+  height: var(--dotWidth);
+  border-radius: 100%;
+  background-color: black;
+}
+
+.DieDot-verticalTop {
+  top: var(--dotMargin);
+}
+
+.DieDot-verticalMiddle {
+  top: calc(var(--dotMargin) * 2 + var(--dotWidth));
+}
+
+.DieDot-verticalBottom {
+  bottom: var(--dotMargin);
+}
+
+.DieDot-horizontalLeft {
+  left: var(--dotMargin);
+}
+
+.DieDot-horizontalMiddle {
+  left: calc(var(--dotMargin) * 2 + var(--dotWidth));
+}
+
+.DieDot-horizontalRight {
+  right: var(--dotMargin);
+}

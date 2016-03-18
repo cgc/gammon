@@ -3,6 +3,7 @@ const PropTypes = React.PropTypes;
 import classnames from 'classnames';
 import { connect } from 'react-redux';
 import { Checker } from './checker';
+import { Die } from './die';
 import {
   clickOnPoint, rollDice, startGame, doMovePieceHome, forfeitRolls,
 } from '../actions';
@@ -12,7 +13,6 @@ import {
 import { pointType } from './types';
 
 require('../styles/Board.css');
-require('../styles/Checker.css');
 
 export const BoardPoint = React.createClass({
   propTypes: {
@@ -136,8 +136,9 @@ export const Board = React.createClass({
     if (this.props.turnPhase === 'ROLL_DICE') {
       action = <button onClick={ this.props.rollDice }>Roll dice</button>;
     } else if (this.props.turnPhase === 'MOVE_PIECES') {
+      const rolls = this.props.rolls.map(roll => <Die face={ roll } />);
       action = (<div>
-        <div>Rolls: { this.props.rolls.join(' ') }</div>
+        <div>Rolls: { rolls }</div>
         <button onClick={ this.props.forfeitRolls }>Give up</button>
       </div>);
     } else if (['NEW'].concat(endGamePhases).includes(this.props.turnPhase)) {
