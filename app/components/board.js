@@ -136,7 +136,9 @@ export const Board = React.createClass({
     if (this.props.turnPhase === 'ROLL_DICE') {
       action = <button onClick={ this.props.rollDice }>Roll dice</button>;
     } else if (this.props.turnPhase === 'MOVE_PIECES') {
-      const rolls = this.props.rolls.map(roll => <Die face={ roll } />);
+      const rolls = this.props.rolls.map((roll, index) =>
+        <Die key={ index } face={ roll } />
+      );
       action = (<div>
         <div>Rolls: { rolls }</div>
         <button onClick={ this.props.forfeitRolls }>Give up</button>

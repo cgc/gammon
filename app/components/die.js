@@ -46,8 +46,8 @@ export const Die = React.createClass({
   },
 
   render() {
-    const dots = faceToDotClasses[this.props.face].map(classes =>
-      <div className={ classnames('DieDot', classes) } />
+    const dots = faceToDotClasses[this.props.face].map((classes, index) =>
+      <div key={ index } className={ classnames('DieDot', classes) } />
     );
     return (<span className="Die">
       { dots }
