@@ -26,8 +26,11 @@ export function maybeEndTurn() {
 
 export function doMovePiece(currentIndex, nextIndex) {
   return (dispatch) => {
-    dispatch(movePiece({ currentIndex, nextIndex }));
-    dispatch(deselectPoint());
+    try {
+      dispatch(movePiece({ currentIndex, nextIndex }));
+    } finally {
+      dispatch(deselectPoint());
+    }
     dispatch(maybeEndTurn());
   };
 }
@@ -55,8 +58,11 @@ export function clickOnPoint(index) {
 
 export function doMovePieceHome(homeColor) {
   return (dispatch, getState) => {
-    dispatch(movePieceHome(homeColor));
-    dispatch(deselectPoint());
+    try {
+      dispatch(movePieceHome(homeColor));
+    } finally {
+      dispatch(deselectPoint());
+    }
     if (hasPlayerWon(getState().currentPlayer, getState().points)) {
       dispatch(endGame(getState().currentPlayer));
     } else {
