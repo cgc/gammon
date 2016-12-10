@@ -6,7 +6,7 @@
   "scripts": {
     "test": "eslint app/**/*.js && npm run build",
     "build": "webpack",
-    "release": "npm run build && git add -f dist && git commit -am 'release'",
+    "release": "git checkout gh-pages && git reset --hard master && npm run build && git add -f dist && git commit -am 'release' && git push -f origin gh-pages",
     "dev": "webpack-dev-server"
   },
   "author": "",
