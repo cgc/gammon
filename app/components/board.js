@@ -6,13 +6,47 @@ import { Checker } from './checker';
 import { Die } from './die';
 import {
   clickOnPoint, rollDice, startGame, doMovePieceHome, forfeitRolls,
+  deselectPoint,
 } from '../actions';
 import {
   WHITE, BLACK, WHITE_ON_BAR_INDEX, BLACK_ON_BAR_INDEX, computePotentialMoves,
 } from '../reducers';
 import { pointType } from './types';
+import { DragDropContext, DragSource, DropTarget } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 
 require('../styles/Board.css');
+
+const CHECKER = 'checker';
+
+const DraggableChecker = DragSource(CHECKER, { // eslint-disable-line new-cap
+  beginDrag(props) {
+    // need to deselect before we "click" on the current point, otherwise we
+    // might move to the current point.
+    props.deselectPoint();
+    props.clickOnPoint();
+    return {
+      pointIndex: props.pointIndex,
+    };
+  },
+}, (dragConnect, monitor) => ({
+  connectDragSource: dragConnect.dragSource(),
+  isDragging: monitor.isDragging(),
+}))(React.createClass({
+  propTypes: {
+    isDragging: PropTypes.bool.isRequired,
+    connectDragSource: PropTypes.func.isRequired,
+  },
+
+  render() {
+    const style = {
+      opacity: this.props.isDragging ? 0.5 : 1,
+    };
+    return this.props.connectDragSource(<div style={ style }>
+      <Checker {...this.props} />
+    </div>);
+  },
+}));
 
 export const BoardPoint = React.createClass({
   propTypes: {
@@ -21,6 +55,8 @@ export const BoardPoint = React.createClass({
     isHighlighted: PropTypes.bool.isRequired,
     isSelected: PropTypes.bool.isRequired,
     onClick: PropTypes.func.isRequired,
+    connectDropTarget: PropTypes.func.isRequired,
+    deselectPoint: PropTypes.func.isRequired,
   },
 
   render() {
@@ -47,11 +83,14 @@ export const BoardPoint = React.createClass({
       }
       return (
         <div key={ checkerIndex } className="Board-checker">
-          <Checker point={ point } hideCount style={ style } />
+          <DraggableChecker point={ point } hideCount style={ style }
+            pointIndex={ index } clickOnPoint={ this.props.onClick }
+            deselectPoint={ this.props.deselectPoint }
+          />
         </div>
       );
     });
-    return (<div className={ classname }
+    return this.props.connectDropTarget(<div className={ classname }
       onClick={ this.props.onClick }
     >
       <div className="Board-pointArrow"></div>
@@ -59,6 +98,19 @@ export const BoardPoint = React.createClass({
     </div>);
   },
 });
+
+const BoardPointTarget = DropTarget(CHECKER, { // eslint-disable-line new-cap
+  drop(props, monitor) {
+    props.onClick();
+    return {
+      from: monitor.getItem().pointIndex,
+      to: props.index,
+    };
+  },
+}, (dropConnect, monitor) => ({
+  connectDropTarget: dropConnect.dropTarget(),
+  isOver: monitor.isOver(),
+}))(BoardPoint);
 
 export const Board = React.createClass({
   propTypes: {
@@ -77,6 +129,7 @@ export const Board = React.createClass({
     startGame: PropTypes.func.isRequired,
     movePieceHome: PropTypes.func.isRequired,
     forfeitRolls: PropTypes.func.isRequired,
+    deselectPoint: PropTypes.func.isRequired,
   },
 
   _renderHome(point) {
@@ -103,10 +156,11 @@ export const Board = React.createClass({
       // We adjust the current index by 1 because we slice when rendering.
       const index = _index + 1;
       const onClick = this.props.clickOnPoint.bind(null, index);
-      return (<BoardPoint key={ index } point={ point } index={ index }
+      return (<BoardPointTarget key={ index } point={ point } index={ index }
         isSelected={ this.props.selectedPointIndex === index }
         isHighlighted={ potentialMoves.includes(index) }
         onClick={ onClick }
+        deselectPoint={ this.props.deselectPoint }
       />);
     });
 
@@ -192,4 +246,5 @@ export default connect((state) => ({
   rollDice: () => dispatch(rollDice()),
   startGame: () => dispatch(startGame()),
   forfeitRolls: () => dispatch(forfeitRolls()),
-}))(Board);
+  deselectPoint: () => dispatch(deselectPoint()),
+}))(DragDropContext(HTML5Backend)(Board)); // eslint-disable-line new-cap
